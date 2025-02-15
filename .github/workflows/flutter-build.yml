@@ -14,34 +14,37 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Verify Files
-        run: ls -l  # Debugging step to check folder structure
+      - name: Verify Directory Structure
+        run: |
+          echo "Checking repository structure..."
+          ls -l /home/runner/work/
+          ls -l /home/runner/work/voice-assistant-app || echo "Project folder not found!"
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.13.0'
 
-      - name: Check Flutter Version
-        run: flutter --version
-
       - name: Set Project Directory
         run: |
-          if [ -d "PJ-voice-assistant" ]; then
-            cd PJ-voice-assistant
+          if [ -d "voice-assistant-app" ]; then
+            echo "PROJECT_PATH=voice-assistant-app" >> $GITHUB_ENV
+          else
+            echo "Error: Flutter project directory not found!"
+            exit 1
           fi
 
       - name: Install Dependencies
         run: flutter pub get
-        working-directory: PJ-voice-assistant  
+        working-directory: ${{ env.PROJECT_PATH }}
 
       - name: Build APK
         run: flutter build apk --release
-        working-directory: PJ-voice-assistant  
+        working-directory: ${{ env.PROJECT_PATH }}
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: PJ-voice-assistant/build/app/outputs/flutter-apk/app-release.apk
+          path: ${{ env.PROJECT_PATH }}/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
