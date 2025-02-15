@@ -40,7 +40,7 @@ jobs:
         run: flutter doctor -v
 
       - name: Accept Android Licenses
-        run: sudo flutter doctor --android-licenses
+        run: yes | flutter doctor --android-licenses
 
       - name: Install Dependencies
         run: flutter pub get
