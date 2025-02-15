@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Voice Assistant</string>
+    <string name="welcome_message">Welcome to your Voice Assistant</string>
+    <string name="command_prompt">Please say a command</string>
+    <string name="error_message">An error occurred, please try again</string>
+    <string name="device_control">Controlling your devices...</string>
+    <string name="voice_command">Voice command recognized</string>
+</resources>
