@@ -10,68 +10,65 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      # 2. Verify repository structure and confirm Flutter project exists
+      # Verify directory structure before proceeding
       - name: Verify Directory Structure
         run: |
           echo "Repository root:"
           ls -la
-          echo "Listing voice-assistant-app folder:"
-          ls -la voice-assistant-app
-          echo "Checking for pubspec.yaml in voice-assistant-app..."
-          if [ ! -f voice-assistant-app/pubspec.yaml ]; then
-            echo "Error: pubspec.yaml not found in voice-assistant-app. Please ensure your Flutter project is set up correctly."
+          echo "Contents of voice-assistant-app:"
+          ls -la voice-assistant-app/
+          echo "Checking for pubspec.yaml..."
+          if [ ! -f "voice-assistant-app/pubspec.yaml" ]; then
+            echo "Error: pubspec.yaml not found! Ensure your Flutter project is correctly set up."
             exit 1
-          else
-            echo "pubspec.yaml found."
           fi
 
-      # 3. Setup Java (using Java 17, which is required by the Android SDK tools)
+      # Setup Java (required for Android builds)
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: 'zulu'
+          java-version: '17' # Updated Java version to avoid SDK errors
 
-      # 4. Install Flutter (specify version and channel)
+      # Install Flutter SDK
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.13.0'
           channel: 'stable'
 
-      # 5. Run Flutter Doctor to verify the installation
+      # Check Flutter installation
       - name: Flutter Doctor
         run: flutter doctor -v
 
-      # 6. Automatically accept Android licenses (without using sudo)
+      # Accept Android SDK Licenses
       - name: Accept Android Licenses
         run: yes | flutter doctor --android-licenses
 
-      # 7. Install Flutter dependencies
+      # Install dependencies (Flutter packages)
       - name: Install Dependencies
         run: |
           cd voice-assistant-app
           flutter pub get
 
-      # 8. Build the APK in release mode
+      # Build the APK
       - name: Build APK
         run: |
           cd voice-assistant-app
           flutter build apk --release
 
-      # 9. Verify that the APK was created
+      # Verify APK Exists
       - name: Verify APK Exists
         run: |
           cd voice-assistant-app
           ls -la build/app/outputs/flutter-apk/
 
-      # 10. Upload the generated APK as an artifact
+      # Upload the APK as an artifact
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
