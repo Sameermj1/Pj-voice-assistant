@@ -16,7 +16,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      # 2. Verify repository structure and confirm Flutter project exists in voice-assistant-app
+      # 2. Verify repository structure and confirm Flutter project exists
       - name: Verify Directory Structure
         run: |
           echo "Repository root:"
@@ -25,13 +25,13 @@ jobs:
           ls -la voice-assistant-app
           echo "Checking for pubspec.yaml in voice-assistant-app..."
           if [ ! -f voice-assistant-app/pubspec.yaml ]; then
-            echo "pubspec.yaml not found in voice-assistant-app. Exiting."
+            echo "Error: pubspec.yaml not found in voice-assistant-app. Please ensure your Flutter project is set up correctly."
             exit 1
           else
             echo "pubspec.yaml found."
           fi
 
-      # 3. Setup Java (using Java 17 from Temurin)
+      # 3. Setup Java (using Java 17, which is required by the Android SDK tools)
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -49,17 +49,17 @@ jobs:
       - name: Flutter Doctor
         run: flutter doctor -v
 
-      # 6. Automatically accept Android licenses (without sudo)
+      # 6. Automatically accept Android licenses (without using sudo)
       - name: Accept Android Licenses
         run: yes | flutter doctor --android-licenses
 
-      # 7. Install Flutter dependencies (change to the project directory first)
+      # 7. Install Flutter dependencies
       - name: Install Dependencies
         run: |
           cd voice-assistant-app
           flutter pub get
 
-      # 8. Build the APK (in release mode)
+      # 8. Build the APK in release mode
       - name: Build APK
         run: |
           cd voice-assistant-app
