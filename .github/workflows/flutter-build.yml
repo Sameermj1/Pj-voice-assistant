@@ -10,50 +10,68 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
+      # 2. Verify repository structure and confirm Flutter project exists in voice-assistant-app
       - name: Verify Directory Structure
         run: |
           echo "Repository root:"
           ls -la
-          echo "Flutter project contents:"
-          ls -la voice-assistant-app/
-          echo "pubspec.yaml exists:"
-          test -f voice-assistant-app/pubspec.yaml && echo "Found" || echo "Missing"
+          echo "Listing voice-assistant-app folder:"
+          ls -la voice-assistant-app
+          echo "Checking for pubspec.yaml in voice-assistant-app..."
+          if [ ! -f voice-assistant-app/pubspec.yaml ]; then
+            echo "pubspec.yaml not found in voice-assistant-app. Exiting."
+            exit 1
+          else
+            echo "pubspec.yaml found."
+          fi
 
+      # 3. Setup Java (using Java 17 from Temurin)
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
+      # 4. Install Flutter (specify version and channel)
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.13.0'
           channel: 'stable'
 
+      # 5. Run Flutter Doctor to verify the installation
       - name: Flutter Doctor
         run: flutter doctor -v
 
+      # 6. Automatically accept Android licenses (without sudo)
       - name: Accept Android Licenses
         run: yes | flutter doctor --android-licenses
 
+      # 7. Install Flutter dependencies (change to the project directory first)
       - name: Install Dependencies
-        run: flutter pub get
-        working-directory: voice-assistant-app
+        run: |
+          cd voice-assistant-app
+          flutter pub get
 
+      # 8. Build the APK (in release mode)
       - name: Build APK
-        run: flutter build apk --release
-        working-directory: voice-assistant-app
+        run: |
+          cd voice-assistant-app
+          flutter build apk --release
 
+      # 9. Verify that the APK was created
       - name: Verify APK Exists
-        run: ls -la build/app/outputs/flutter-apk/
-        working-directory: voice-assistant-app
+        run: |
+          cd voice-assistant-app
+          ls -la build/app/outputs/flutter-apk/
 
+      # 10. Upload the generated APK as an artifact
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
