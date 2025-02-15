@@ -1,0 +1,47 @@
+name: Flutter APK Build
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Verify Files
+        run: ls -l  # Debugging step to check folder structure
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.13.0'
+
+      - name: Check Flutter Version
+        run: flutter --version
+
+      - name: Set Project Directory
+        run: |
+          if [ -d "PJ-voice-assistant" ]; then
+            cd PJ-voice-assistant
+          fi
+
+      - name: Install Dependencies
+        run: flutter pub get
+        working-directory: PJ-voice-assistant  
+
+      - name: Build APK
+        run: flutter build apk --release
+        working-directory: PJ-voice-assistant  
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: PJ-voice-assistant/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
