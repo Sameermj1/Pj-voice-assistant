@@ -3,7 +3,7 @@ name: Build Flutter APK
 on:
   push:
     branches:
-      - main
+      - main    # Change this if your default branch is different
   workflow_dispatch:
 
 jobs:
@@ -11,42 +11,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Check out the repository
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
+      # (Optional) List the repository structure for debugging
       - name: Verify Directory Structure
         run: |
-          echo "Checking repository structure..."
-          ls -l
-          ls -l voice-assistant-app || echo "Project folder not found!"
+          echo "Repository root:"
+          ls -la
+          echo "Contents of voice-assistant-app directory:"
+          ls -la voice-assistant-app
 
+      # Install Flutter using the subosito/flutter-action
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.13.0'
+          flutter-version: '3.13.0'  # Specify your Flutter version here
 
-      - name: Set Project Directory
-        run: |
-          if [ -d "voice-assistant-app" ]; then
-            echo "PROJECT_PATH=voice-assistant-app" >> $GITHUB_ENV
-          else
-            echo "Error: Flutter project directory not found!"
-            exit 1
-          fi
-
+      # Install Flutter dependencies (make sure pubspec.yaml is inside voice-assistant-app)
       - name: Install Dependencies
         run: flutter pub get
-        working-directory: ${{ env.PROJECT_PATH }}
+        working-directory: voice-assistant-app
 
+      # Build the APK in release mode
       - name: Build APK
         run: flutter build apk --release
-        working-directory: ${{ env.PROJECT_PATH }}
+        working-directory: voice-assistant-app
 
-      - name: Upload APK
+      # Upload the generated APK as an artifact
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: ${{ env.PROJECT_PATH }}/build/app/outputs/flutter-apk/app-release.apk
+          path: voice-assistant-app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
